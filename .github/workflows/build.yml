@@ -1,39 +1,25 @@
-name: Build Android APK
+name: Build APK
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: unzip -q frotta-main-new-colors.zip
+      - run: unzip -q FrottaFileManager.zip
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          packages: 'platforms;android-34 build-tools;34.0.0 platform-tools'
-      - name: Create local.properties
-        working-directory: frotta-main
-        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-      - name: Download fonts
-        working-directory: frotta-main
-        run: |
-          mkdir -p app/src/main/res/font
-          wget -q -O app/src/main/res/font/tajawal_regular.ttf https://raw.githubusercontent.com/google/fonts/main/ofl/tajawal/Tajawal-Regular.ttf
-          wget -q -O app/src/main/res/font/tajawal_bold.ttf https://raw.githubusercontent.com/google/fonts/main/ofl/tajawal/Tajawal-Bold.ttf
-      - name: Install Gradle 8.5
-        run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -q gradle-8.5-bin.zip
-          echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
-      - name: Build Debug APK
-        working-directory: frotta-main
-        run: gradle app:assembleDebug --no-daemon
+          gradle-version: 8.9
+          build-root-directory: FrottaFileManager
+      - run: gradle assembleRelease --no-daemon
+        working-directory: FrottaFileManager
       - uses: actions/upload-artifact@v4
         with:
-          name: frotta-debug-apk
-          path: frotta-main/app/build/outputs/apk/debug/app-debug.apk
+          name: Frotta-File-Manager-APK
+          path: FrottaFileManager/app/build/outputs/apk/release/*.apk
