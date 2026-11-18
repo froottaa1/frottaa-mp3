@@ -1,25 +1,35 @@
-name: Build APK
+
+name: Build Frotta Files APK
+
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: unzip -q FrottaFileManager.zip
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.9
-          build-root-directory: FrottaFileManager
-      - run: gradle assembleRelease --no-daemon
-        working-directory: FrottaFileManager
+          gradle-version: '8.13'
+
+      - name: Build APK
+        run: gradle --no-daemon clean :app:assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
-          name: Frotta-File-Manager-APK
-          path: FrottaFileManager/app/build/outputs/apk/release/*.apk
+          name: Frotta-Files-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
